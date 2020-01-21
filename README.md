@@ -1,4 +1,4 @@
-# PDA - Socion [WebApp](https://pda-s.socion.io/oauth/login/)
+# MGNREGA Application
 
 A Python Console Application that allows user to login, create and manage sub-users(GPM, Members), create and manage projects, assign users to project and decide wage, etc. and file complaints and issues.
 
