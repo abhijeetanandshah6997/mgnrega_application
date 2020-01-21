@@ -37,7 +37,18 @@ Run the below commands :-
 ---
 ### Project Structure
 ```
-
++ mgnrega_application
+├── controllers
+│   ├── admin.py
+│   └── login.py
+├── env
+├── main.py
+├── mgnrega.sqlite
+├── models
+│   ├── project.py
+│   ├── user_project_wage.py
+│   └── user.py
+└── README.md
 ```
 ---
 ### License
