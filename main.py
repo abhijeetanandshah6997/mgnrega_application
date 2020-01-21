@@ -36,6 +36,12 @@ def new_account():
     return new_user
 
 
+def user_list(users):
+    print('\nSr. No.\t\tUser ID\t\tUsername\t\tRole')
+    for idx, user in enumerate(users, start=1):
+        print(str(idx) + "\t\t" + str(user['user_id']) + "\t\t" + user['username'] + "\t\t\t" + user['role'])
+
+
 def main():
     os.system('clear')
     conn = db_connection()
@@ -51,16 +57,18 @@ def main():
             with conn:
                 login_user = Login.login(conn, username=username, password=password)
                 if login_user is not None:
-                    if login_user['role'] == 'admin':
+                    if login_user['role'] == 'bdo':
                         while True:
                             os.system('clear')
                             print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
+
                             print("\nMenu"
                                   "\n(1)Add New GPM Account"
-                                  "\n(2)Show All GPM Accounts"
-                                  "\n(3)Delete GPM Account"
-                                  "\n(4)Quit\n")
+                                  "\n(2)Show Reporting GPM Accounts"
+                                  "\n(3)Update GPM Account"
+                                  "\n(4)Delete GPM Account"
+                                  "\n(5)Logout\n")
                             ch = input(">> ").lower().rstrip()
                             if ch == "1":
                                 new_user_details = new_account()
@@ -70,25 +78,69 @@ def main():
                                 conn.commit()
                                 input("\nPress Enter to continue...")
                             elif ch == "2":
-                                users = User.view_specific_users(conn, role='gpm')
-                                print('\nSr. No.\t\tUser ID\t\tUsername')
-                                for idx, user in enumerate(users, start=1):
-                                    print(str(idx) + "\t\t" + str(user['user_id']) + "\t\t" + user['username'])
+                                users = User.view_specific_users(conn)
+                                if users is not None:
+                                    user_list(users)
+                                else:
+                                    print("No reporting user available...")
                                 input("\nPress Enter to continue...")
                             elif ch == "3":
-                                users = User.view_specific_users(conn, role='gpm')
-                                print('\nSr. No.\t\tUser ID\t\tUsername')
-                                for idx, user in enumerate(users, start=1):
-                                    print(str(idx) + "\t\t" + str(user['user_id']) + "\t\t" + user['username'])
-                                user_to_be_deleted = input("\nEnter username to be deleted : ").lower().rstrip()
-                                deleted_user = User.delete_user(conn, user_to_be_deleted)
-                                if deleted_user is 0:
-                                    print("User is doesn't exists")
+                                users = User.view_specific_users(conn)
+                                if users is not None:
+                                    user_list(users)
+                                    user_to_be_updated = input("\nEnter username to be updated : ").lower().rstrip()
+                                    print("\nSelect Field/(s) to Update:-"
+                                          "\n username"
+                                          "\n password"
+                                          "\n email"
+                                          "\n first_name"
+                                          "\n last_name"
+                                          "\n age"
+                                          "\n gender"
+                                          "\n contact"
+                                          "\n area"
+                                          "\n pin_code"
+                                          "\n role"
+                                          "\n is_deleted"
+                                          "\n")
+                                    fields = ["username", "password", "email", "first_name", "last_name", "age",
+                                              "gender", "contact", "area", "pin_code", "role", "is_deleted", ]
+                                    field_to_update = dict()
+                                    more = 'y'
+                                    while more == 'y':
+                                        field_name = input("Enter field name : ").lower().rstrip()
+                                        if field_name in fields:
+                                            field_value = input("Enter field value : ")
+                                            field_to_update[field_name] = field_value
+                                            more = input("Update more Fields (Y/N) : ").lower().rstrip()
+                                        else:
+                                            print("\n No such field.. Please try again...")
+                                            more = 'y'
+                                    updated_user = User.update_user(conn, user_to_be_updated, **field_to_update)
+                                    if updated_user is 0:
+                                        print("User is doesn't exists")
+                                    else:
+                                        print(f"User {user_to_be_updated} is updated.")
+                                    conn.commit()
                                 else:
-                                    print(f"User {user_to_be_deleted} is deleted.")
-                                conn.commit()
+                                    print("No reporting user available...")
                                 input("\nPress Enter to continue...")
                             elif ch == "4":
+                                users = User.view_specific_users(conn)
+                                if users is not None:
+                                    user_list(users)
+                                    user_to_be_deleted = input("\nEnter username to be deleted : ").lower().rstrip()
+                                    deleted_user = User.delete_user(conn, user_to_be_deleted)
+                                    if deleted_user is 0:
+                                        print("User is doesn't exists")
+                                    else:
+                                        print(f"User {user_to_be_deleted} is deleted.")
+                                    conn.commit()
+                                else:
+                                    print("No reporting user available...")
+                                input("\nPress Enter to continue...")
+                            elif ch == "5":
+                                Login.logged_in_user = dict()
                                 os.system('clear')
                                 break
                             else:
@@ -98,13 +150,14 @@ def main():
                             os.system('clear')
                             print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
-                            print("\nMenu\n(1)Something\n(2)Something Else\n(3)Quit\n")
+                            print("\nMenu\n(1)Something\n(2)Something Else\n(3)Logout\n")
                             ch = input(">> ").lower().rstrip()
                             if ch == "1":
                                 pass
                             elif ch == "2":
                                 pass
                             elif ch == "3":
+                                Login.logged_in_user = dict()
                                 os.system('clear')
                                 break
                             else:
@@ -114,13 +167,14 @@ def main():
                             os.system('clear')
                             print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
-                            print("\nMenu\n(1)Something\n(2)Something Else\n(3)Quit\n")
+                            print("\nMenu\n(1)Something\n(2)Something Else\n(3)Logout\n")
                             ch = input(">> ").lower().rstrip()
                             if ch == "1":
                                 pass
                             elif ch == "2":
                                 pass
                             elif ch == "3":
+                                Login.logged_in_user = dict()
                                 os.system('clear')
                                 break
                             else:

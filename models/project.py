@@ -4,24 +4,16 @@ from sqlite3 import IntegrityError
 from controllers.login import Login
 
 
-class User:
+class Project:
 
-    def __init__(self, username, password, email, first_name, last_name, age, gender, contact, area, pin_code,
-                 role='member'):
-        self.username = username
-        self.password = password
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
-        self.age = age
-        self.gender = gender
-        self.contact = contact
+    def __init__(self, project_name, project_type, area, total_required_member, cost_estimate, start_date, end_date_estimate):
+        self.project_name = project_name
+        self.project_type = project_type
         self.area = area
-        self.pin_code = pin_code
-        self.role = role
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-        self.is_deleted = False
+        self.total_required_member = total_required_member
+        self.cost_estimate = cost_estimate
+        self.start_date = start_date
+        self.end_date_estimate = end_date_estimate
 
     @staticmethod
     def query_runner(conn, sql_query, sql_params):
