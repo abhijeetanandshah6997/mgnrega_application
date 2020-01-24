@@ -1,16 +1,23 @@
+from controllers.core import Core
+
+
 class Login:
 
     logged_in_user = dict()
 
     @staticmethod
     def login(conn, username, password):
-        cursor_obj = conn.cursor()
-        cursor_obj.execute("SELECT * FROM user WHERE username=? AND password=?", (username, password))
+        sql_query = '''SELECT * FROM user WHERE username=? AND password=?'''
+        sql_params = (username, password, )
+        cursor_obj = Core.query_runner(conn, sql_query, sql_params)
         user = cursor_obj.fetchone()
         cursor_obj.close()
         if user is not None:
-            Login.logged_in_user = dict(user)
-            return dict(user)
+            if user['is_deleted'] == 0:
+                Login.logged_in_user = dict(user)
+                return dict(user)
+            else:
+                return 'access_denied'
         else:
             return user
 
