@@ -4,8 +4,10 @@ import sqlite3
 from sqlite3 import Error
 from getpass import getpass
 from datetime import datetime
+import parser
 
 from controllers.login import Login
+from models.complaints import Complaints
 from models.user import User
 from models.project import Project
 from models.user_project_wage import UserProjectWage
@@ -63,6 +65,17 @@ def new_project_assignment():
     return new_user_project_wage
 
 
+def new_complaint(bdo_user_id, gpm_user_id):
+    print('\n')
+    user_id = Login.logged_in_user['user_id']
+    gpm_user_id = bdo_user_id
+    bdo_user_id = gpm_user_id
+    complaint_subject = input('Enter Complaint Subject : ')
+    complaint_description = input('Enter Complaint Description : ')
+    new_user_complaint = Complaints(user_id, gpm_user_id, bdo_user_id, complaint_subject, complaint_description)
+    return new_user_complaint
+
+
 def user_list(users):
     print('\nSr. No.\t\tUser ID\t\tUsername\t\tRole')
     for idx, user in enumerate(users, start=1):
@@ -81,6 +94,12 @@ def user_project_list(conn, user_projects):
         user = User.view_user_details(conn, user_project['user_id'])
         project = Project.view_project_details(conn, user_project['project_id'])
         print(str(idx) + "\t" + str(user['user_id']) + "\t\t" + str(user['username']) + "\t\t" + str(project['project_id']) + "\t\t" + str(project['project_name']) + "\t" + str(user_project['no_of_days_worked']) + "\t\t\tRs. " + str(user_project['wage']) + "\t\t" + str(user_project['attendance']) + "\t\t" + approval_status(user_project['is_bdo_approved']) + "\t\t" + approval_status(user_project['is_wage_approved']) + "\t\t" + approval_status(user_project['is_job_card_issued']))
+
+
+def complaint_list(complaints):
+    print('\nSr. No.\tUser ID\tBDO ID\tGPM ID\tComplain Subject\tComplain Description\t\t\t\tComplain Date\tResolved')
+    for idx, complaint in enumerate(complaints, start=1):
+        print(str(idx) + "\t" + str(complaint['user_id']) + "\t" + str(complaint['bdo_user_id']) + "\t" + str(complaint['gpm_user_id']) + "\t" + complaint['complain_subject'] + "\t\t" + str(complaint['complain_description'])[:20] + "...\t\t\t\t" + str(datetime.strptime(complaint['created_at'], '%Y-%m-%d %H:%M:%S.%f').date()) + "\t" + approval_status(complaint['is_resolved']))
 
 
 def approval_status(value):
@@ -123,7 +142,8 @@ def main():
                                   "\n(9)Approve Member Assignment"
                                   "\n(10)Approve Wage"
                                   "\n(11)Pending Approval Requests"
-                                  "\n(12)Logout\n")
+                                  "\n(12)See All Complaints"
+                                  "\n(13)Logout\n")
                             ch = input(">> ").lower().rstrip()
                             if ch == "1":
                                 new_user_details = new_account()
@@ -351,6 +371,13 @@ def main():
                                     print("No reporting user available...")
                                 input("\nPress Enter to continue...")
                             elif ch == "12":
+                                complaints = Complaints.view_specific_complaints(conn)
+                                if complaints is not None and complaints:
+                                    complaint_list(complaints)
+                                else:
+                                    print("No complaints available...")
+                                input("\nPress Enter to continue...")
+                            elif ch == "13":
                                 Login.logged_in_user = dict()
                                 os.system('clear')
                                 break
@@ -490,12 +517,38 @@ def main():
                             os.system('clear')
                             print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
-                            print("\nMenu\n(1)Something\n(2)Something Else\n(3)Logout\n")
+                            print("\nMenu"
+                                  "\n(1)View my Account Details/Job Cards"
+                                  "\n(2)File Complaints/Issues"
+                                  "\n(3)Logout\n")
                             ch = input(">> ").lower().rstrip()
                             if ch == "1":
-                                pass
+                                user_projects = UserProjectWage.view_user_projects(conn, Login.logged_in_user['user_id'])
+                                user_approved_job_cards = [user_project for user_project in user_projects if user_project["is_job_card_issued"]]
+                                if user_approved_job_cards:
+                                    for job_card in user_approved_job_cards:
+                                        UserProjectWage.show_job_card(conn, job_card['user_id'], job_card['project_id'])
+                                else:
+                                    print("\nNot assigned a Project or Job card not Issued\n")
+                                    user = Login.logged_in_user
+                                    print("*-------------------------------------------------------*")
+                                    print(f"| Username : {user['username']} \t\t\t\t\t|")
+                                    print(f"| Name : {user['first_name']} {user['last_name']} \t\t\t\t\t\t|")
+                                    print(f"| Email : {user['email']} \t\t\t\t|")
+                                    print(f"| Age : {user['age']} \t\t\t\t\t\t|")
+                                    print(f"| Gender : {user['gender']} \t\t\t\t\t\t|")
+                                    print(f"| Address : {user['area']}-{user['pin_code']} \t\t\t|")
+                                    print("*-------------------------------------------------------*")
+                                input("\nPress Enter to continue...")
                             elif ch == "2":
-                                pass
+                                mem_reporting_heads = Complaints.get_members_bdo_gpm(conn)
+                                new_complaint_details = new_complaint(mem_reporting_heads['bdo_user_id'],
+                                                                      mem_reporting_heads['gpm_user_id'])
+                                new_complaint_id = new_complaint_details.issue_complaints(conn)
+                                if new_complaint_id is not None:
+                                    print(new_complaint_id)
+                                conn.commit()
+                                input("\nPress Enter to continue...")
                             elif ch == "3":
                                 Login.logged_in_user = dict()
                                 os.system('clear')

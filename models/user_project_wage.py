@@ -1,4 +1,3 @@
-from datetime import datetime
 from sqlite3 import IntegrityError
 
 from controllers.login import Login
@@ -99,6 +98,16 @@ class UserProjectWage:
             return user_project
 
     @staticmethod
+    def view_user_projects(conn, user_id):
+        if user_id is not None:
+            sql_query = '''SELECT * FROM user_project_wage WHERE user_id=? AND is_deleted=False'''
+            sql_params = (user_id, )
+            cursor_obj = Core.query_runner(conn, sql_query, sql_params)
+            user_projects = cursor_obj.fetchall()
+            cursor_obj.close()
+            return user_projects
+
+    @staticmethod
     def change_field_status(conn, user_id, project_id, **kwargs):
         field_name = kwargs.get('field_name', None)
         if project_id is not None and user_id is not None:
@@ -125,6 +134,7 @@ class UserProjectWage:
                 print(f"| Address : {user['area']}-{user['pin_code']} \t\t\t|")
                 print(f"| Project Name : {project['project_name']} \t\t\t|")
                 print(f"| Project Type : {project['project_type']} \t\t\t|")
+                print(f"| Wage : {user_project['wage']} \t\t\t\t\t|")
                 print("*-------------------------------------------------------*")
             else:
                 print("Request GPM for Job Card...")
