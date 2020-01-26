@@ -1,4 +1,3 @@
-# main function
 import os
 import sqlite3
 from sqlite3 import Error
@@ -27,6 +26,10 @@ class DataBaseClass:
 
 
 def new_account():
+    """
+    Take inputs from user and create an instance of User Class
+    :return: User object
+    """
     print('\n')
     username = input('Enter username : ')
     password = input('Enter password : ')
@@ -44,6 +47,10 @@ def new_account():
 
 
 def new_project():
+    """
+    Take inputs from user for creating a new project instance of Project Class
+    :return: Project Object
+    """
     print('\n')
     project_name = input('Enter Project name : ')
     project_type = input('Enter Project type (Road Construction/Sewage Treatment/ Building Construction) : ')
@@ -57,6 +64,10 @@ def new_project():
 
 
 def new_project_assignment():
+    """
+    Take inputs from user to associate a project with member and create an instance of UserProjectWage Class
+    :return: UserProjectWage Object
+    """
     print('\n')
     user_id = int(input('Enter user_id to be assigned a project : '))
     project_id = int(input('Enter project_id user will be assigned : '))
@@ -68,6 +79,10 @@ def new_project_assignment():
 
 
 def new_complaint(bdo_user_id, gpm_user_id):
+    """
+    Take input from user to file complaints and create an instance Complaints Class
+    :return: Complaints Object
+    """
     print('\n')
     user_id = Login.logged_in_user['user_id']
     complaint_subject = input('Enter Complaint Subject : ')
@@ -77,18 +92,31 @@ def new_complaint(bdo_user_id, gpm_user_id):
 
 
 def user_list(users):
+    """
+    Function that take a list of users and prints in a particular specified format.
+    :param users: a list of users details
+    """
     print('\nSr. No.\t\tUser ID\t\tUsername\t\tRole')
     for idx, user in enumerate(users, start=1):
         print(str(idx) + "\t\t" + str(user['user_id']) + "\t\t" + user['username'] + "\t\t\t" + user['role'])
 
 
 def project_list(projects):
+    """
+    Function that take a list of projects and prints in a particular specified format.
+    :param projects: a list of project details
+    """
     print('\nSr. No.\tProject ID\tProject Name\t\tProject Type\t\tArea\t\tRequired Members\tCost Estimate\t\tStart Date\tEnd Date Estimate')
     for idx, project in enumerate(projects, start=1):
         print(str(idx) + "\t" + str(project['project_id']) + "\t\t" + project['project_name'] + "\t" + project['project_type'] + "\t" + project['area'] + "\t" + str(project['total_required_member']) + "\t\t\tRs. " + str(project['cost_estimate']) + "\t" + project['start_date'] + "\t" + project['end_date_estimate'])
 
 
 def user_project_list(conn, user_projects):
+    """
+    Function that take a list of user association with projects and prints in a particular specified format.
+    :param conn: a sqlite db connection object
+    :param user_projects: a list of user project association
+    """
     print('\nSr. No.\tUser ID\t\tUsername\tProject ID\tProject Name\t\tNo. of Days Worked\tWage\t\t\tAttendance\tBDO Approved\tWage Approved\tJob Card Issued')
     for idx, user_project in enumerate(user_projects, start=1):
         user = User.view_user_details(conn, user_project['user_id'])
@@ -97,12 +125,21 @@ def user_project_list(conn, user_projects):
 
 
 def complaint_list(complaints):
+    """
+    Function that take a list of complaints and prints in a particular specified format.
+    :param complaints: a list of filed complaints by the user
+    """
     print('\nSr. No.\tUser ID\tBDO ID\tGPM ID\tComplain Subject\tComplain Description\t\t\t\tComplain Date\tResolved')
     for idx, complaint in enumerate(complaints, start=1):
         print(str(idx) + "\t" + str(complaint['user_id']) + "\t" + str(complaint['bdo_user_id']) + "\t" + str(complaint['gpm_user_id']) + "\t" + complaint['complain_subject'] + "\t\t" + str(complaint['complain_description'])[:20] + "...\t\t\t\t" + str(datetime.strptime(complaint['created_at'], '%Y-%m-%d %H:%M:%S.%f').date()) + "\t" + approval_status(complaint['is_resolved']))
 
 
 def approval_status(value):
+    """
+    Function that return string value for boolean
+    :param value: a boolean value
+    :return: corresponding string -  YES for True (1) and NO for False (0)
+    """
     if value:
         return 'YES'
     else:
@@ -110,8 +147,12 @@ def approval_status(value):
 
 
 def main():
+    """
+    Driver Function from where the program is executed and is responsible for providing the Menu Driven Approach for
+    MGNREGA Application Features.
+    """
     os.system('clear')
-    conn = DataBaseClass.db_connection()
+    conn = DataBaseClass.db_connection()    # Database Connection Object
     conn.row_factory = sqlite3.Row
     while True:
         print("\nWelcome to MGNREGA Application :- \n(1)Login\n(2)Quit\n")
@@ -126,7 +167,7 @@ def main():
                 if login_user == 'access_denied':
                     print('Access Denied..!! Contact BDO.')
                 elif login_user is not None:
-                    if login_user['role'] == 'bdo':
+                    if login_user['role'] == 'bdo':     # Checks if the Logged in user role is BDO
                         while True:
                             os.system('clear')
                             print(f"Welcome ! {login_user['first_name']}...")
@@ -383,7 +424,7 @@ def main():
                                 break
                             else:
                                 print("Invalid choice, please choose again\n")
-                    elif login_user['role'] == 'gpm':
+                    elif login_user['role'] == 'gpm':   # Checks if the Logged in user role is GPM
                         while True:
                             os.system('clear')
                             print(login_user)
@@ -512,7 +553,7 @@ def main():
                                 break
                             else:
                                 print("Invalid choice, please choose again\n")
-                    elif login_user['role'] == 'member':
+                    elif login_user['role'] == 'member':    # Checks if the Logged in user role is Member
                         while True:
                             os.system('clear')
                             print(login_user)
@@ -561,6 +602,7 @@ def main():
                     print('No user found... Try Login Again...')
         elif ch == "2":
             os.system('clear')
+            conn.close()    # Closing the DB Connection
             break
         else:
             print("Invalid choice, please choose again\n")

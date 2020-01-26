@@ -9,6 +9,14 @@ from models.user import User
 class UserProjectWage:
 
     def __init__(self, user_id, project_id, no_of_days_worked, wage, attendance):
+        """
+        An init function that is called when the class object is created. It also initializes the Class Variable
+        :param user_id: user_id of the user for assignment
+        :param project_id: project_id of project to be assigned
+        :param no_of_days_worked: no of days the user has worked
+        :param wage: wage of the user for working on the project
+        :param attendance: attendance of the user on the project
+        """
         self.user_id = user_id
         self.project_id = project_id
         self.no_of_days_worked = no_of_days_worked
@@ -20,6 +28,12 @@ class UserProjectWage:
         self.is_deleted = False
 
     def assign_project(self, conn):
+        """
+        function to insert a record in the user_project_wage table, thereby adding a new assignment of user to a project
+        :param self: reference to the current object reference
+        :param conn: a sqlite db connection object
+        :return: new user_project_wage_id of the record created
+        """
         try:
             sql_query = '''INSERT INTO user_project_wage(user_id, project_id, no_of_days_worked, wage, attendance, is_bdo_approved, is_wage_approved, is_job_card_issued, is_deleted) VALUES(?,?,?,?,?,?,?,?,?)'''
             sql_params = (self.user_id, self.project_id, self.no_of_days_worked, self.wage, self.attendance, self.is_bdo_approved, self.is_wage_approved, self.is_job_card_issued, self.is_deleted, )
@@ -32,6 +46,13 @@ class UserProjectWage:
 
     @staticmethod
     def view_specific_user_projects(conn, **kwargs):
+        """
+        a function to fetch the records from the user_project_wage table in the database based on the role of the
+        logged in user.
+        :param conn: a sqlite db connection object
+        :param kwargs: a keyword argument variable in case of update, assignment_approval, wage_approval or pending_requests
+        :return: a list of user project associations.
+        """
         action = kwargs.get('action', None)
         if not action == 'assignment_approval' and not action == 'wage_approval' and not action == 'pending_requests':
             sql_query_user = '''SELECT * FROM gpm_mem_rel WHERE gpm_user_id=?'''
@@ -61,6 +82,14 @@ class UserProjectWage:
 
     @staticmethod
     def update_user_project(conn, user_id, project_id, **kwargs):
+        """
+        a function to update the details of the user
+        :param conn: a sqlite db connection object
+        :param user_id: user_id of the specific user to fetch from db
+        :param project_id: project_id of project associated with user_id
+        :param kwargs: a list of keyword arguments with field name and field values to be updated
+        :return: number of row updated
+        """
         if project_id is not None and user_id is not None:
             update_param = str()
             new_values = list()
@@ -79,6 +108,13 @@ class UserProjectWage:
 
     @staticmethod
     def delete_user_project(conn, user_id, project_id):
+        """
+        a function to set the is_deleted flag to True, thereby soft deleting the user project association from db
+        :param conn: a sqlite db connection object
+        :param user_id: user_id of the specific user to fetch from db
+        :param project_id: project_id of project associated with user_id
+        :return: number of soft deleted row
+        """
         if project_id is not None and user_id is not None:
             sql_query = '''UPDATE user_project_wage SET is_deleted=True WHERE user_id=? AND project_id=?'''
             sql_params = (user_id, project_id, )
@@ -89,6 +125,14 @@ class UserProjectWage:
 
     @staticmethod
     def view_user_project_details(conn, user_id, project_id):
+        """
+        a function to fetch the details of the projects associated with the user from the user_project_wage table in the
+        database based on the user_id and project_id.
+        :param conn: a sqlite db connection object
+        :param user_id: user_id of the specific user to fetch from db
+        :param project_id: project_id of project associated with user_id
+        :return: details of a projects associated with user
+        """
         if project_id is not None and user_id is not None:
             sql_query = '''SELECT * FROM user_project_wage WHERE user_id=? AND project_id=?'''
             sql_params = (user_id, project_id,)
@@ -99,6 +143,13 @@ class UserProjectWage:
 
     @staticmethod
     def view_user_projects(conn, user_id):
+        """
+        a function to fetch the list of the projects associated with the user from the user_project_wage table in the
+         database based on the user_id.
+        :param conn: a sqlite db connection object
+        :param user_id: user_id of the specific user to fetch from db
+        :return: list of the details of projects associated with user with specific user_id
+        """
         if user_id is not None:
             sql_query = '''SELECT * FROM user_project_wage WHERE user_id=? AND is_deleted=False'''
             sql_params = (user_id, )
@@ -109,6 +160,15 @@ class UserProjectWage:
 
     @staticmethod
     def change_field_status(conn, user_id, project_id, **kwargs):
+        """
+        a function to set the alternate boolean flag field to True/False, thereby changing approval status.
+        wage approval etc.
+        :param conn: a sqlite db connection object
+        :param user_id: user id of the user
+        :param project_id: project id of the project user is associated with
+        :param kwargs: a list of keyword arguments with field name and field values to be updated
+        :return: number of updated row
+        """
         field_name = kwargs.get('field_name', None)
         if project_id is not None and user_id is not None:
             sql_query = '''UPDATE user_project_wage SET ''' + field_name + '''=True WHERE user_id=? AND project_id=?'''
@@ -120,6 +180,12 @@ class UserProjectWage:
 
     @staticmethod
     def show_job_card(conn, user_id, project_id):
+        """
+        a function to print the job card of a member with personal info and on-boarded project with wage
+        :param conn:
+        :param user_id: user id of the user to display job card
+        :param project_id: project id associated with the user
+        """
         if project_id is not None and user_id is not None:
             user_project = UserProjectWage.view_user_project_details(conn, user_id, project_id)
             if bool(user_project['is_job_card_issued']):

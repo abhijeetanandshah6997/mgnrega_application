@@ -9,6 +9,20 @@ class User:
 
     def __init__(self, username, password, email, first_name, last_name, age, gender, contact, area, pin_code,
                  role='member'):
+        """
+        An init function that is called when the class object is created. It also initializes the Class Variable
+        :param username: username of the user for login
+        :param password: password to login to the account
+        :param email: email of the user
+        :param first_name: first name of the user
+        :param last_name: last name of the user
+        :param age: age of the user in years
+        :param gender: gender of user (M/F)
+        :param contact: contact number
+        :param area: area of residence of user
+        :param pin_code: pin code of user residence
+        :param role: role of the user(bdo/gpm/member) default parameter
+        """
         self.username = username
         self.password = password
         self.email = email
@@ -25,6 +39,13 @@ class User:
         self.is_deleted = False
 
     def add_user(self, conn, gpm_user_id):
+        """
+        function to insert a record in the user table, thereby adding a new user
+        :param self: reference to the current object reference
+        :param conn: a sqlite db connection object
+        :param gpm_user_id: gpm_user_id in case the new user is member
+        :return: new user_id of the record created
+        """
         try:
             sql_query = '''INSERT INTO user(username, password, email, first_name, last_name, age, gender, contact, area,
                            pin_code, role, created_at, updated_at, is_deleted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
@@ -50,6 +71,13 @@ class User:
 
     @staticmethod
     def view_specific_users(conn, **kwargs):
+        """
+        a function to fetch the records from the user table in the database based on the role of the
+        logged in user. user are the reporting user/heads of the logged in user
+        :param conn: a sqlite db connection object
+        :param kwargs: a keyword argument variable in case of update
+        :return: a list of users.
+        """
         action = kwargs.get('action', None)
         sql_query = str()
         if Login.logged_in_user['role'] == 'bdo':
@@ -85,6 +113,12 @@ class User:
 
     @staticmethod
     def view_user_details(conn, user_id):
+        """
+        a function to fetch the details of the user from the user table in the database based on the user_id.
+        :param conn: a sqlite db connection object
+        :param user_id: user_id of the specific user to fetch from db
+        :return: details of a user record of specific user_id
+        """
         if user_id is not None:
             sql_query = '''SELECT * FROM user WHERE user_id=?'''
             sql_params = (user_id, )
@@ -95,6 +129,13 @@ class User:
 
     @staticmethod
     def update_user(conn, username, **kwargs):
+        """
+        a function to update the details of the user
+        :param conn: a sqlite db connection object
+        :param username: username of the user to be updated
+        :param kwargs: a list of keyword arguments with field name and field values to be updated
+        :return: number of row updated
+        """
         if username is not None:
             updated_at = datetime.now()
             update_param = str()
@@ -112,6 +153,12 @@ class User:
 
     @staticmethod
     def delete_user(conn, username):
+        """
+        a function to set the is_deleted flag to True, thereby soft deleting the user from db
+        :param conn: a sqlite db connection object
+        :param username: username of the user to be soft deleted
+        :return: number of soft deleted row
+        """
         if username:
             updated_at = datetime.now()
             sql_query = '''UPDATE user SET is_deleted=True,updated_at=? WHERE username=?'''

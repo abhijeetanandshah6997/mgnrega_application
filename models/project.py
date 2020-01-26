@@ -8,6 +8,16 @@ from controllers.core import Core
 class Project:
 
     def __init__(self, project_name, project_type, area, total_required_member, cost_estimate, start_date, end_date_estimate):
+        """
+        An init function that is called when the class object is created. It also initializes the Class Variable
+        :param project_name: name of the project
+        :param project_type: type of project (road construction/sewage treatment/building construction)
+        :param area: area of the project
+        :param total_required_member: total required member on the project
+        :param cost_estimate: cost of project
+        :param start_date: project start date
+        :param end_date_estimate: estimated end date of project
+        """
         self.project_name = project_name
         self.project_type = project_type
         self.area = area
@@ -21,6 +31,12 @@ class Project:
         self.is_deleted = False
 
     def add_project(self, conn):
+        """
+        function to insert a record in the project table, thereby adding a new project
+        :param self: reference to the current object reference
+        :param conn: a sqlite db connection object
+        :return: new project_id of the record created
+        """
         try:
             sql_query = '''INSERT INTO project(project_name, project_type, area, total_required_member, cost_estimate,
                         start_date, end_date_estimate, created_by, created_at, updated_at, is_deleted) 
@@ -37,6 +53,13 @@ class Project:
 
     @staticmethod
     def view_specific_projects(conn, **kwargs):
+        """
+        a function to fetch the records from the project table in the database based on the role of the
+        logged in user.
+        :param conn: a sqlite db connection object
+        :param kwargs: a keyword argument variable in case of update
+        :return: a list of projects.
+        """
         action = kwargs.get('action', None)
         sql_params = None
         if Login.logged_in_user['role'] == 'bdo':
@@ -60,6 +83,12 @@ class Project:
 
     @staticmethod
     def view_project_details(conn, project_id):
+        """
+        a function to fetch the details of the project from the project table in the database based on the project_id.
+        :param conn: a sqlite db connection object
+        :param project_id: project_id of the specific project to fetch from db
+        :return: details of a project record of specific project_id
+        """
         if project_id is not None:
             sql_query = '''SELECT * FROM project WHERE project_id=?'''
             sql_params = (project_id, )
@@ -70,6 +99,13 @@ class Project:
 
     @staticmethod
     def update_project(conn, project_id, **kwargs):
+        """
+        a function to update the details of the project
+        :param conn: a sqlite db connection object
+        :param project_id: project_id to be updated
+        :param kwargs: a list of keyword arguments with field name and field values to be updated
+        :return: number of row updated
+        """
         if project_id is not None:
             updated_at = datetime.now()
             update_param = str()
@@ -87,6 +123,12 @@ class Project:
 
     @staticmethod
     def delete_project(conn, project_id):
+        """
+        a function to set the is_deleted flag to True, thereby soft deleting the project from db
+        :param conn: a sqlite db connection object
+        :param project_id: project_id to be soft deleted
+        :return: number of soft deleted row
+        """
         if project_id:
             updated_at = datetime.now()
             sql_query = '''UPDATE project SET is_deleted=True,updated_at=? WHERE project_id=?'''
