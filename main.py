@@ -4,7 +4,6 @@ import sqlite3
 from sqlite3 import Error
 from getpass import getpass
 from datetime import datetime
-import parser
 
 from controllers.login import Login
 from models.complaints import Complaints
@@ -13,15 +12,18 @@ from models.project import Project
 from models.user_project_wage import UserProjectWage
 
 
-def db_connection():
-    """ create a database connection to the SQLite database
-    :return: Connection object or None
-    """
-    try:
-        con = sqlite3.connect('mgnrega.sqlite')
-        return con
-    except Error:
-        print(Error)
+class DataBaseClass:
+
+    @staticmethod
+    def db_connection():
+        """ create a database connection to the SQLite database
+        :return: Connection object or None
+        """
+        try:
+            conn = sqlite3.connect('mgnrega.sqlite')
+            return conn
+        except Error:
+            print(Error)
 
 
 def new_account():
@@ -68,11 +70,9 @@ def new_project_assignment():
 def new_complaint(bdo_user_id, gpm_user_id):
     print('\n')
     user_id = Login.logged_in_user['user_id']
-    gpm_user_id = bdo_user_id
-    bdo_user_id = gpm_user_id
     complaint_subject = input('Enter Complaint Subject : ')
     complaint_description = input('Enter Complaint Description : ')
-    new_user_complaint = Complaints(user_id, gpm_user_id, bdo_user_id, complaint_subject, complaint_description)
+    new_user_complaint = Complaints(user_id, bdo_user_id, gpm_user_id, complaint_subject, complaint_description)
     return new_user_complaint
 
 
@@ -111,7 +111,7 @@ def approval_status(value):
 
 def main():
     os.system('clear')
-    conn = db_connection()
+    conn = DataBaseClass.db_connection()
     conn.row_factory = sqlite3.Row
     while True:
         print("\nWelcome to MGNREGA Application :- \n(1)Login\n(2)Quit\n")
