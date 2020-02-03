@@ -25,6 +25,15 @@ class DataBaseClass:
             print(Error)
 
 
+def int_input(input_message):
+    try:
+        int_val = int(input(input_message))
+        return int_val
+    except:
+        print("Wrong Input.. Try Again...")
+        return None
+
+
 def new_account():
     """
     Take inputs from user and create an instance of User Class
@@ -36,11 +45,15 @@ def new_account():
     email = input('Enter email : ')
     first_name = input('Enter first name : ')
     last_name = input('Enter last name : ')
-    age = int(input('Enter age : '))
+    age = None
+    while age is None:
+        age = int_input('Enter age : ')
     gender = input('Enter gender (M/F) : ')
     contact = input('Enter contact : ')
     area = input('Enter Area - District,State : ')
-    pin_code = input('Enter pin code : ')
+    pin_code = None
+    while pin_code is None:
+        pin_code = int_input('Enter pin code : ')
     role = input('Enter role (gpm/member) : ')
     new_user = User(username, password, email, first_name, last_name, age, gender, contact, area, pin_code, role)
     return new_user
@@ -55,7 +68,9 @@ def new_project():
     project_name = input('Enter Project name : ')
     project_type = input('Enter Project type (Road Construction/Sewage Treatment/ Building Construction) : ')
     area = input('Enter Area : ')
-    total_required_member = int(input('Enter total no. of required Members : '))
+    total_required_member = None
+    while total_required_member is None:
+        total_required_member = int_input('Enter total no. of required Members : ')
     cost_estimate = float(input('Enter cost estimate : '))
     start_date = datetime.strptime(input('Enter start date (YYYY-MM-DD) : '), '%Y-%m-%d').date()
     end_date_estimate = datetime.strptime(input('Enter end date estimate (YYYY-MM-DD) : '), '%Y-%m-%d').date()
@@ -69,11 +84,19 @@ def new_project_assignment():
     :return: UserProjectWage Object
     """
     print('\n')
-    user_id = int(input('Enter user_id to be assigned a project : '))
-    project_id = int(input('Enter project_id user will be assigned : '))
-    no_of_days_worked = int(input('Enter number of days worked: '))
+    user_id = None
+    while user_id is None:
+        user_id = int_input('Enter user_id to be assigned a project : ')
+    project_id = None
+    while project_id is None:
+        project_id = int_input('Enter project_id user will be assigned : ')
+    no_of_days_worked = None
+    while no_of_days_worked is None:
+        no_of_days_worked = int_input('Enter number of days worked: ')
     wage = no_of_days_worked * 100.0
-    attendance = int(input('Enter attendance: '))
+    attendance = None
+    while attendance is None:
+        attendance = int_input('Enter attendance: ')
     new_user_project_wage = UserProjectWage(user_id, project_id, no_of_days_worked, wage, attendance)
     return new_user_project_wage
 
@@ -117,11 +140,11 @@ def user_project_list(conn, user_projects):
     :param conn: a sqlite db connection object
     :param user_projects: a list of user project association
     """
-    print('\nSr. No.\tUser ID\t\tUsername\tProject ID\tProject Name\t\tNo. of Days Worked\tWage\t\t\tAttendance\tBDO Approved\tWage Approved\tJob Card Issued')
+    print('\nSr. No.\tUser ID\tUsername\tProject ID\tProject Name\t\tDays Worked\tWage\t\t\tAttendance\tBDO Approved\tWage Approved\tJob Card Issued')
     for idx, user_project in enumerate(user_projects, start=1):
         user = User.view_user_details(conn, user_project['user_id'])
         project = Project.view_project_details(conn, user_project['project_id'])
-        print(str(idx) + "\t" + str(user['user_id']) + "\t\t" + str(user['username']) + "\t\t" + str(project['project_id']) + "\t\t" + str(project['project_name']) + "\t" + str(user_project['no_of_days_worked']) + "\t\t\tRs. " + str(user_project['wage']) + "\t\t" + str(user_project['attendance']) + "\t\t" + approval_status(user_project['is_bdo_approved']) + "\t\t" + approval_status(user_project['is_wage_approved']) + "\t\t" + approval_status(user_project['is_job_card_issued']))
+        print(str(idx) + "\t" + str(user['user_id']) + "\t" + str(user['username']) + "\t\t" + str(project['project_id']) + "\t\t" + str(project['project_name']) + "\t" + str(user_project['no_of_days_worked']) + "\t\tRs. " + str(user_project['wage']) + "\t\t" + str(user_project['attendance']) + "\t\t" + approval_status(user_project['is_bdo_approved']) + "\t\t" + approval_status(user_project['is_wage_approved']) + "\t\t" + approval_status(user_project['is_job_card_issued']))
 
 
 def complaint_list(complaints):
@@ -193,7 +216,9 @@ def main():
                                     if users is not None and users:
                                         users = [user for user in users if user['role'] == 'gpm']
                                         user_list(users)
-                                        gpm_user_id = int(input('Enter GPM\'s user_id to be assigned the member : '))
+                                        gpm_user_id = None
+                                        while gpm_user_id is None:
+                                            gpm_user_id = int_input('Enter GPM\'s user_id to be assigned the member : ')
                                         new_users_id = new_user_details.add_user(conn, gpm_user_id)
                                         if new_users_id is not None:
                                             print(new_users_id)
@@ -295,7 +320,9 @@ def main():
                                 projects = Project.view_specific_projects(conn, action='update')
                                 if projects is not None:
                                     project_list(projects)
-                                    project_id_to_be_updated = int(input("\nEnter project_id to be updated : "))
+                                    project_id_to_be_updated = None
+                                    while project_id_to_be_updated is None:
+                                        project_id_to_be_updated = int_input("\nEnter project_id to be updated : ")
                                     print("\nSelect Field/(s) to Update:-"
                                           "\n project_name"
                                           "\n project_type"
@@ -345,7 +372,9 @@ def main():
                                 projects = Project.view_specific_projects(conn)
                                 if projects:
                                     project_list(projects)
-                                    project_id_to_be_deleted = int(input("\nEnter project_id to be deleted : "))
+                                    project_id_to_be_deleted = None
+                                    while project_id_to_be_deleted is None:
+                                        project_id_to_be_deleted = int_input("\nEnter project_id to be deleted : ")
                                     deleted_project = Project.delete_project(conn, project_id_to_be_deleted)
                                     if deleted_project is 0:
                                         print("Project doesn't exists")
@@ -360,20 +389,27 @@ def main():
                                 if users is not None and users:
                                     user_ids = [user['user_id'] for user in users if user['role'] == 'member']
                                     user_member_projects = UserProjectWage.view_specific_user_projects(conn, action='assignment_approval', user_ids=user_ids)
-                                    user_project_list(conn, user_member_projects)
-                                    print("\nEnter User ID and Project ID of Assignment to be Approved : ")
-                                    user_id_to_be_issued = int(input("\nEnter user_id : "))
-                                    project_id_to_be_issued = int(input("\nEnter project_id : "))
-                                    updated_user_project = UserProjectWage.change_field_status(conn,
-                                                                                               user_id_to_be_issued,
-                                                                                               project_id_to_be_issued,
-                                                                                               field_name='is_bdo_approved')
-                                    if updated_user_project is 0:
-                                        print("User Project Assignment doesn't exists")
+                                    if user_member_projects:
+                                        user_project_list(conn, user_member_projects)
+                                        print("\nEnter User ID and Project ID of Assignment to be Approved : ")
+                                        user_id_to_be_issued = None
+                                        while user_id_to_be_issued is None:
+                                            user_id_to_be_issued = int_input("\nEnter user_id : ")
+                                        project_id_to_be_issued = None
+                                        while project_id_to_be_issued is None:
+                                            project_id_to_be_issued = int_input("\nEnter project_id : ")
+                                        updated_user_project = UserProjectWage.change_field_status(conn,
+                                                                                                   user_id_to_be_issued,
+                                                                                                   project_id_to_be_issued,
+                                                                                                   field_name='is_bdo_approved')
+                                        if updated_user_project is 0:
+                                            print("User Project Assignment doesn't exists")
+                                        else:
+                                            print(
+                                                f"User Project Assignment with user_id:{user_id_to_be_issued} and project_id:{project_id_to_be_issued} is Approved.")
+                                        conn.commit()
                                     else:
-                                        print(
-                                            f"User Project Assignment with user_id:{user_id_to_be_issued} and project_id:{project_id_to_be_issued} is Approved.")
-                                    conn.commit()
+                                        print("No pending request for Project Assignment Approval.")
                                 else:
                                     print("No reporting user available...")
                                 input("\nPress Enter to continue...")
@@ -384,19 +420,26 @@ def main():
                                     user_member_projects = UserProjectWage.view_specific_user_projects(conn,
                                                                                                        action='wage_approval',
                                                                                                        user_ids=user_ids)
-                                    user_project_list(conn, user_member_projects)
-                                    print("\nEnter User ID and Project ID of Assignment to Approve Wage : ")
-                                    user_id_to_be_issued = int(input("\nEnter user_id : "))
-                                    project_id_to_be_issued = int(input("\nEnter project_id : "))
-                                    updated_user_project = UserProjectWage.change_field_status(conn,
-                                                                                               user_id_to_be_issued,
-                                                                                               project_id_to_be_issued,
-                                                                                               field_name='is_wage_approved')
-                                    if updated_user_project is 0:
-                                        print("User Project Assignment doesn't exists")
+                                    if user_member_projects:
+                                        user_project_list(conn, user_member_projects)
+                                        print("\nEnter User ID and Project ID of Assignment to Approve Wage : ")
+                                        user_id_to_be_issued = None
+                                        while user_id_to_be_issued is None:
+                                            user_id_to_be_issued = int_input("\nEnter user_id : ")
+                                        project_id_to_be_issued = None
+                                        while project_id_to_be_issued is None:
+                                            project_id_to_be_issued = int_input("\nEnter project_id : ")
+                                        updated_user_project = UserProjectWage.change_field_status(conn,
+                                                                                                   user_id_to_be_issued,
+                                                                                                   project_id_to_be_issued,
+                                                                                                   field_name='is_wage_approved')
+                                        if updated_user_project is 0:
+                                            print("User Project Assignment doesn't exists")
+                                        else:
+                                            print(f"User Project Assignment with user_id:{user_id_to_be_issued} and project_id:{project_id_to_be_issued} wage is Approved.")
+                                        conn.commit()
                                     else:
-                                        print(f"User Project Assignment with user_id:{user_id_to_be_issued} and project_id:{project_id_to_be_issued} wage is Approved.")
-                                    conn.commit()
+                                        print("No pending request for Wage Approval.")
                                 else:
                                     print("No reporting user available...")
                                 input("\nPress Enter to continue...")
@@ -427,7 +470,6 @@ def main():
                     elif login_user['role'] == 'gpm':   # Checks if the Logged in user role is GPM
                         while True:
                             os.system('clear')
-                            print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
                             print("\nMenu"
                                   "\n(1)Assign Member to Project"
@@ -467,8 +509,12 @@ def main():
                                 if user_projects is not None and user_projects:
                                     user_project_list(conn, user_projects)
                                     print("\nEnter User ID and Project ID of Assignment to be updated : ")
-                                    user_id_to_be_updated = int(input("\nEnter user_id : "))
-                                    project_id_to_be_updated = int(input("\nEnter project_id : "))
+                                    user_id_to_be_updated = None
+                                    while user_id_to_be_updated is None:
+                                        user_id_to_be_updated = int_input("\nEnter user_id : ")
+                                    project_id_to_be_updated = None
+                                    while project_id_to_be_updated is None:
+                                        project_id_to_be_updated = int_input("\nEnter project_id : ")
                                     print("\nSelect Field/(s) to Update:-"
                                           "\n no_of_days_worked"
                                           "\n wage"
@@ -518,8 +564,12 @@ def main():
                                 if user_projects is not None and user_projects:
                                     user_project_list(conn, user_projects)
                                     print("\nEnter User ID and Project ID of Assignment to be deleted : ")
-                                    user_id_to_be_deleted = int(input("\nEnter user_id : "))
-                                    project_id_to_be_deleted = int(input("\nEnter project_id : "))
+                                    user_id_to_be_deleted = None
+                                    while user_id_to_be_deleted is None:
+                                        user_id_to_be_deleted = int_input("\nEnter user_id : ")
+                                    project_id_to_be_deleted = None
+                                    while project_id_to_be_deleted is None:
+                                        project_id_to_be_deleted = int_input("\nEnter project_id : ")
                                     deleted_user_project = UserProjectWage.delete_user_project(conn, user_id_to_be_deleted, project_id_to_be_deleted)
                                     if deleted_user_project is 0:
                                         print("User Project Assignment doesn't exists")
@@ -535,8 +585,12 @@ def main():
                                     user_projects = [user_project for user_project in user_projects if not user_project['is_job_card_issued']]
                                     user_project_list(conn, user_projects)
                                     print("\nEnter User ID and Project ID of Assignment to be Issued Job Card : ")
-                                    user_id_to_be_issued = int(input("\nEnter user_id : "))
-                                    project_id_to_be_issued = int(input("\nEnter project_id : "))
+                                    user_id_to_be_issued = None
+                                    while user_id_to_be_issued is None:
+                                        user_id_to_be_issued = int_input("\nEnter user_id : ")
+                                    project_id_to_be_issued = None
+                                    while project_id_to_be_issued is None:
+                                        project_id_to_be_issued = int_input("\nEnter project_id : ")
                                     updated_user_project = UserProjectWage.change_field_status(conn, user_id_to_be_issued, project_id_to_be_issued, field_name='is_job_card_issued')
                                     if updated_user_project is 0:
                                         print("User Project Assignment doesn't exists")
@@ -556,7 +610,6 @@ def main():
                     elif login_user['role'] == 'member':    # Checks if the Logged in user role is Member
                         while True:
                             os.system('clear')
-                            print(login_user)
                             print(f"Welcome ! {login_user['first_name']}...")
                             print("\nMenu"
                                   "\n(1)View my Account Details/Job Cards"
