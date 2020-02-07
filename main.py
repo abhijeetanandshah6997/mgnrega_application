@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 from sqlite3 import Error
 from getpass import getpass
@@ -34,6 +35,42 @@ def int_input(input_message):
         return None
 
 
+regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+
+
+def email_input():
+    email = input('Enter email : ')
+    if re.search(regex, email):
+        return email
+    else:
+        print("Wrong Input.. Try Again...")
+        return None
+
+
+re_gender = ['M', 'F']
+
+
+def gender_input():
+    gender = input('Enter gender (M/F) : ').upper()
+    if gender in re_gender:
+        return gender
+    else:
+        print("Wrong Input.. Try Again...")
+        return None
+
+
+re_role = ['gpm', 'member']
+
+
+def role_input():
+    role = input('Enter role (gpm/member) : ').lower()
+    if role in re_role:
+        return role
+    else:
+        print("Wrong Input.. Try Again...")
+        return None
+
+
 def new_account():
     """
     Take inputs from user and create an instance of User Class
@@ -42,19 +79,27 @@ def new_account():
     print('\n')
     username = input('Enter username : ')
     password = input('Enter password : ')
-    email = input('Enter email : ')
+    email = None
+    while email is None:
+        email = email_input()
     first_name = input('Enter first name : ')
     last_name = input('Enter last name : ')
     age = None
     while age is None:
         age = int_input('Enter age : ')
-    gender = input('Enter gender (M/F) : ')
-    contact = input('Enter contact : ')
+    gender = None
+    while gender is None:
+        gender = gender_input()
+    contact = None
+    while contact is None:
+        contact = int_input('Enter contact : ')
     area = input('Enter Area - District,State : ')
     pin_code = None
     while pin_code is None:
         pin_code = int_input('Enter pin code : ')
-    role = input('Enter role (gpm/member) : ')
+    role = None
+    while role is None:
+        role = role_input()
     new_user = User(username, password, email, first_name, last_name, age, gender, contact, area, pin_code, role)
     return new_user
 
@@ -225,6 +270,11 @@ def main():
                                         conn.commit()
                                     else:
                                         print("No reporting user available...")
+                                elif new_user_details.role == 'gpm':
+                                    new_users_id = new_user_details.add_user(conn)
+                                    if new_users_id is not None:
+                                        print(new_users_id)
+                                    conn.commit()
                                 input("\nPress Enter to continue...")
                             elif ch == "2":
                                 users = User.view_specific_users(conn)
@@ -239,7 +289,6 @@ def main():
                                     user_list(users)
                                     user_to_be_updated = input("\nEnter username to be updated : ").lower().rstrip()
                                     print("\nSelect Field/(s) to Update:-"
-                                          "\n username"
                                           "\n password"
                                           "\n email"
                                           "\n first_name"
@@ -249,15 +298,15 @@ def main():
                                           "\n contact"
                                           "\n area"
                                           "\n pin_code"
-                                          "\n role"
                                           "\n is_deleted"
                                           "\n")
-                                    fields = ["username", "password", "email", "first_name", "last_name", "age",
-                                              "gender", "contact", "area", "pin_code", "role", "is_deleted", ]
+                                    fields = ["password", "email", "first_name", "last_name", "age",
+                                              "gender", "contact", "area", "pin_code", "is_deleted", ]
                                     field_to_update = dict()
                                     more = 'y'
                                     while more == 'y':
                                         field_name = input("Enter field name : ").lower().rstrip()
+                                        field_value = None
                                         if field_name in fields:
                                             if field_name == 'is_deleted':
                                                 incorrect_field_val = True
@@ -272,6 +321,26 @@ def main():
                                                     else:
                                                         incorrect_field_val = True
                                                         print("Invalid Input... Try Again...")
+                                            elif field_name == 'email':
+                                                field_value = None
+                                                while field_value is None:
+                                                    field_value = email_input()
+                                            elif field_name == 'age':
+                                                field_value = None
+                                                while field_value is None:
+                                                    field_value = int_input("Enter Age : ")
+                                            elif field_name == 'gender':
+                                                field_value = None
+                                                while field_value is None:
+                                                    field_value = gender_input()
+                                            elif field_name == 'contact':
+                                                field_value = None
+                                                while field_value is None:
+                                                    field_value = int_input("Enter Contact No. : ")
+                                            elif field_name == 'pin_code':
+                                                field_value = None
+                                                while field_value is None:
+                                                    field_value = int_input("Enter Pin Code : ")
                                             else:
                                                 field_value = input("Enter field value : ")
                                             field_to_update[field_name] = field_value

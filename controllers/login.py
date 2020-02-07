@@ -24,7 +24,8 @@ class Login:
                 Login.logged_in_user = dict(user)
                 return dict(user)
             else:
-                return 'access_denied'
+                user = 'access_denied'
+                return user
         else:
             return user
 

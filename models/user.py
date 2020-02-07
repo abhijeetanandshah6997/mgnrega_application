@@ -38,7 +38,7 @@ class User:
         self.updated_at = datetime.now()
         self.is_deleted = False
 
-    def add_user(self, conn, gpm_user_id):
+    def add_user(self, conn, gpm_user_id=None):
         """
         function to insert a record in the user table, thereby adding a new user
         :param self: reference to the current object reference
